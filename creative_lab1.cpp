@@ -39,10 +39,9 @@ static PyObject *creative_mean(PyObject *self, PyObject *args){
     if(iter == NULL) return NULL;
 
     /* Compute Mean"  */
-    /*TODO: stride ptr, inner size ptr... somehow need to get doubles from numpy
-    https://numpy.org/devdocs/reference/c-api/iterator.html*/
     while(iter->index < iter->size){ 
-        sum += *(iter->dataptr);
+        double *tmp_data = (double *)PyArray_ITER_DATA(iter);
+        sum += (*tmp_data);
         PyArray_ITER_NEXT(iter);
     }
     return PyFloat_FromDouble(sum / (double)iter->size);
@@ -62,19 +61,21 @@ static PyObject *creative_var(PyObject *self, PyObject *args){
     if(iter == NULL) return NULL;
 
     /* Compute Mean"  */
-    while(iter->index < iter->size){
-        sum += *(iter->dataptr);
+    while(iter->index < iter->size){ 
+        double *tmp_data = (double *)PyArray_ITER_DATA(iter);
+        sum += (*tmp_data);
         PyArray_ITER_NEXT(iter);
     }
 
-    double mean = sum / iter->size;
+    double mean = sum / (double)iter->size;
 
     /* Compute Variance */
     PyArray_ITER_RESET(iter);
     sum = 0;
     while(iter->index < iter->size){
-        double tmp = *(iter->dataptr) - mean;
-        sum += (tmp * tmp);
+        double *tmp_data = (double *)PyArray_ITER_DATA(iter);
+        double tmp_std = (*tmp_data) - mean;
+        sum += (tmp_std * tmp_std);
         PyArray_ITER_NEXT(iter);
     }
     return PyFloat_FromDouble(sum / (double)iter->size);
