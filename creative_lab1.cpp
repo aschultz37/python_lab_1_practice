@@ -34,7 +34,7 @@ static PyObject *creative_mean(PyObject *self, PyObject *args){
         return NULL;
     }
 
-    /* Get Array Iterators */
+    /* Get Array Iterator */
     PyArrayIterObject *iter = (PyArrayIterObject *)PyArray_IterNew(arg1);
     if(iter == NULL) return NULL;
 
@@ -60,23 +60,29 @@ static PyObject *creative_var(PyObject *self, PyObject *args){
     PyArrayIterObject *iter = (PyArrayIterObject *)PyArray_IterNew(arg1);
     if(iter == NULL) return NULL;
 
+    double elements[iter->size];
+    int i = 0;
     /* Compute Mean"  */
     while(iter->index < iter->size){ 
         double *tmp_data = (double *)PyArray_ITER_DATA(iter);
         sum += (*tmp_data);
+        elements[i++] = *tmp_data;
         PyArray_ITER_NEXT(iter);
     }
 
     double mean = sum / (double)iter->size;
 
     /* Compute Variance */
-    PyArray_ITER_RESET(iter);
+    //PyArray_ITER_RESET(iter);
     sum = 0;
-    while(iter->index < iter->size){
+    /*while(iter->index < iter->size){
         double *tmp_data = (double *)PyArray_ITER_DATA(iter);
         double tmp_std = (*tmp_data) - mean;
         sum += (tmp_std * tmp_std);
         PyArray_ITER_NEXT(iter);
+    }*/
+    for(i = 0; i < iter->size; i++){
+        sum += ((elements[i] - mean) * (elements[i] - mean));
     }
     return PyFloat_FromDouble(sum / (double)iter->size);
 }
